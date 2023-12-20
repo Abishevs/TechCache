@@ -1,0 +1,40 @@
+name: Build and Publish Sphinx Documentation
+
+on:
+  push:
+    branches: 
+      - master  
+  pull_request:
+    branches: 
+      - master
+
+jobs:
+  build_docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'  
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt  
+
+    - name: Install Sphinx
+      run: pip install sphinx
+
+    - name: Build Documentation
+      run: |
+        cd docs  
+        make html
+
+    - name: Publish Documentation to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/_build/html
