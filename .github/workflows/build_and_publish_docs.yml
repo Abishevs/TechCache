@@ -8,9 +8,21 @@ on:
     branches: 
       - master
 
+# Cancel any in-progress job or run
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build_docs:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
 
     steps:
     - name: Checkout Repository
@@ -49,7 +61,8 @@ jobs:
         git commit -m "Update documentation" -a || true
         # The above command will fail if no changes were present, so we ignore
         # the return code.
-        
+        git push origin gh-pages 
+
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
