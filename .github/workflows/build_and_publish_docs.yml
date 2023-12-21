@@ -1,71 +1,18 @@
-name: Build and Publish Sphinx Documentation
+name: Deploy Sphinx documentation to Pages
 
 on:
   push:
-    branches: 
-      - master  
-  pull_request:
-    branches: 
-      - master
-
-# Cancel any in-progress job or run
-# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+    branches: [master] # branch to trigger deployment
 
 jobs:
-  build_docs:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      pages: write
-      id-token: write
-
+  pages:
+    runs-on: ubuntu-20.04
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - id: deployment
+      uses: sphinx-notes/pages@v3
       with:
-        python-version: '3.11'  
-
-    - name: Install Dependencies
-      run: |
-        pip install -r requirements.txt  
-
-    - name: Install Sphinx
-      run: pip install sphinx
-
-    - name: Build Documentation
-      run: |
-        cd docs  
-        make html
-
-    - uses: actions/upload-artifact@v1
+        publish: false
+    - uses: peaceiris/actions-gh-pages@v3
       with:
-        name: DocumentationHTML
-        path: docs/_build/html/
-
-    - name: Commit documentation changes
-      run: |
-        git clone https://github.com/Abishevs/TechCache.git --branch gh-pages --single-branch gh-pages
-        cp -r docs/_build/html/* gh-pages/
-        cd gh-pages
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git commit -m "Update documentation" -a || true
-        # The above command will fail if no changes were present, so we ignore
-        # the return code.
-        git push origin gh-pages 
-
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        branch: gh-pages
-        directory: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ${{ steps.deployment.outputs.artifact }}
