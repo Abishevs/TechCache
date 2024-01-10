@@ -174,7 +174,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if reply == QtWidgets.QMessageBox.StandardButton.Yes:
             # TODO: clean up
-            self.database.close()
             event.accept()
         else:
             event.ignore()
