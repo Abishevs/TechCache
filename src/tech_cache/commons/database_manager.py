@@ -1,11 +1,8 @@
+from typing import List
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from tech_cache.models.item import Base, Item
-
-# import sqlite3
-from typing import List
-
 
 class DatabaseManager:
     """Handles database connection and data persitance
@@ -21,19 +18,18 @@ class DatabaseManager:
     def get_session(self):
         return self.Session()
 
-
     def get_item(self, item_id:int):
         with self.get_session() as session:
             return session.query(Item).filter(Item.id == item_id).one_or_none()
 
     def add_item(self, item: Item):
-        session = self.get_session()
-        try:
-            session.add(item)
-            session.commit()
-        except SQLAlchemyError as e:
-            session.rollback()
-            raise e
+        with self.get_session() as session:
+            try:
+                session.add(item)
+                session.commit()
+            except SQLAlchemyError as e:
+                session.rollback()
+                raise e
 
     def update_item(self, item_id: int):
 
