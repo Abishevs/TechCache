@@ -39,10 +39,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.filter_proxy_model.setFilterKeyColumn(-1) # search all columns
 
         # set views
-        self.tableView.horizontalHeader().setStretchLastSection(True)
-        # self.tableView.setModel(self.model)
         self.tableView.setModel(self.filter_proxy_model)
+        self.tableView.verticalHeader().setVisible(True)
+        self.tableView.verticalHeader().setFixedWidth(20)
         self.tableView.setSortingEnabled(True)
+        self.tableView.horizontalHeader().setStretchLastSection(True)
+        self.tableView.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Fixed)
+        self.tableView.setColumnWidth(0, 10)
+
+
+        
 
         # set signals and slots
         self.action_export_as.triggered.connect(self.handle_export_action)

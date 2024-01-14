@@ -31,6 +31,7 @@ class Item(Base):
                  category:str = "",
                  quantity:int = 0,
                  specification:str = "",
+                 is_checked = False,
                  ):
 
         self.name = name
@@ -38,20 +39,23 @@ class Item(Base):
         self.category = category
         self.quantity = quantity
         self.specification = specification
+        self.is_checked = is_checked
 
     def __repr__(self) -> str:
         return f"Item(name={self.name!r}, category={self.category!r}, quantity={self.quantity!r})"
 
     def __getitem__(self, column_index):
         if column_index == 0:
-            return self.sku
+            return self.is_checked
         elif column_index == 1:
-            return self.name
+            return self.sku
         elif column_index == 2:
-            return self.category
+            return self.name
         elif column_index == 3:
-            return self.quantity
+            return self.category
         elif column_index == 4:
+            return self.quantity
+        elif column_index == 5:
             return self.specification
         else:
             raise IndexError("Invalid column index")
@@ -59,6 +63,7 @@ class Item(Base):
     def get_fields(self) -> List[Any]:
         """Item fields to display"""
         fields = []
+        fields.append(self.is_checked)
         fields.append(self.sku)
         fields.append(self.name)
         fields.append(self.category)

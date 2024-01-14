@@ -22,6 +22,7 @@ class InventoryTableModel(QtCore.QAbstractTableModel):
 
     def get_item(self, index):
         if index.isValid():
+            print(self.items[0])
             return self.items[index.row()]
         else:
             return None
@@ -36,21 +37,38 @@ class InventoryTableModel(QtCore.QAbstractTableModel):
         """Builtin method
         Defines how many columns to draw.
         """
-        return len(self.config.table_headers)
+        return len(self.config.table_headers) + 1
 
     def data(self, index, role):
         """populates each row and column with coresponding data field"""
         if not index.isValid():
             return None
-        if role != QtCore.Qt.ItemDataRole.DisplayRole:
-            return None
-
         item = self.items[index.row()]
-        column = index.column()
-        try:
-            return item[column]
-        except ValueError:
-            return None
+
+        if role == QtCore.Qt.ItemDataRole.DisplayRole:
+            if index.column() == 0:
+                return index.row() + 1
+            elif index.column() != 1:
+                return item[index.column() - 1]
+
+        if role == QtCore.Qt.ItemDataRole.CheckStateRole and index.column() == 1:  
+            return QtCore.Qt.CheckState.Checked if item.is_checked else QtCore.Qt.CheckState.Unchecked
+
+        return None
+
+    def flags(self, index):
+        flags = super().flags(index)
+        if index.column() == 1:
+            flags |= QtCore.Qt.ItemFlag.ItemIsUserCheckable
+        return flags
+
+    def setData(self, index, value, role):
+        if role == QtCore.Qt.CheckState and index.column() == 1:
+            item = self.items[index.row()]
+            item.is_checked = value == QtCore.Qt.CheckState.Checked
+            self.dataChanged.emit(index, index, [role])
+            return True
+        return False
 
     def sort(self, column: int, order) -> None:
         """column sorting functionility"""
@@ -69,8 +87,10 @@ class InventoryTableModel(QtCore.QAbstractTableModel):
 
         if orientation == QtCore.Qt.Orientation.Horizontal:
             headers = self.config.table_headers 
-            if section <= len(headers) - 1:
-                return headers[section]
+            if section == 0:
+                return "#"
+            elif section <= len(headers) - 1:
+                return headers[section - 1]
 
         return None
 
